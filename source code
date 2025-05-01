@@ -1,0 +1,37 @@
+# === Instalasi library 
+!pip install scikit-image matplotlib opencv-python --quiet
+
+# === Import library
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import color, img_as_float
+from skimage.segmentation import active_contour
+from skimage.data import binary_blobs
+from skimage.filters import gaussian
+
+# === Contoh citra: kita buat citra sintetis (bisa diganti citra medis asli)
+image = binary_blobs(length=256, blob_size_fraction=0.1, n_dim=2, volume_fraction=0.3)
+image = gaussian(image, 1.0)  # Haluskan citra
+
+# === Konversi ke float dan grayscale
+image_float = img_as_float(image)
+
+# === Inisialisasi kontur awal (lingkaran di tengah)
+s = np.linspace(0, 2*np.pi, 400)
+x = 128 + 50*np.cos(s)
+y = 128 + 50*np.sin(s)
+init = np.array([x, y]).T
+
+# === Terapkan active contour
+snake = active_contour(image_float, init, alpha=0.015, beta=10, gamma=0.001)
+
+# === Tampilkan hasil
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.imshow(image, cmap='gray')
+ax.plot(init[:, 0], init[:, 1], '--r', lw=2, label='Kontur awal')
+ax.plot(snake[:, 0], snake[:, 1], '-b', lw=2, label='Kontur akhir (Active Contour)')
+ax.set_title("Segmentasi dengan Active Contour")
+ax.legend()
+plt.axis('off')
+plt.show()
